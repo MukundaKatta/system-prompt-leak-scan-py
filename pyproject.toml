@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "system-prompt-leak-scan"
+version = "0.1.0"
+description = "Detect system prompt leakage in LLM model outputs via known patterns, configured-prompt substring matching, and unique fingerprint phrases. Python port of @mukundakatta/system-prompt-leak-scan."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Mukunda Rao Katta", email = "mukunda.vjcs6@gmail.com" }]
+keywords = [
+  "ai",
+  "llm",
+  "agents",
+  "rag",
+  "evals",
+  "security",
+  "guardrails",
+  "prompt-injection",
+  "claude",
+  "openai",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Security",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/MukundaKatta/system-prompt-leak-scan-py"
+Issues = "https://github.com/MukundaKatta/system-prompt-leak-scan-py/issues"
+Source = "https://github.com/MukundaKatta/system-prompt-leak-scan-py"
+"JS sibling" = "https://github.com/MukundaKatta/system-prompt-leak-scan"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/system_prompt_leak_scan"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/README.md", "/LICENSE"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
