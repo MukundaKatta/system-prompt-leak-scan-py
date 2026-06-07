@@ -56,7 +56,9 @@ _KNOWN_PATTERNS = [
         r"\bdeveloper\s+(?:instructions?|message)\s+(?:says?|is|reads?)\b",
         re.IGNORECASE,
     ),
-    re.compile(r"\bhere\s+(?:is|are)\s+my\s+(?:system\s+prompt|instructions)\b", re.IGNORECASE),
+    re.compile(
+        r"\bhere\s+(?:is|are)\s+my\s+(?:system\s+prompt|instructions)\b", re.IGNORECASE
+    ),
 ]
 
 _TOKEN_RE = re.compile(r"\w+")
@@ -179,7 +181,10 @@ def scan(
     fp_hit_count = 0
     if fingerprints:
         text_lower = text.lower()
-        seen_spans: Set[int] = set()
+        # Dedupe on the full (start, end) span so that two *distinct*
+        # fingerprints sharing a start offset (e.g. "AB" and "ABC") are
+        # both reported -- each is independent evidence of leakage.
+        seen_spans: Set[tuple] = set()
         for fp in fingerprints:
             if not isinstance(fp, str) or not fp.strip():
                 continue
@@ -187,9 +192,10 @@ def scan(
             idx = text_lower.find(needle)
             if idx == -1:
                 continue
-            if idx in seen_spans:
+            span = (idx, idx + len(needle))
+            if span in seen_spans:
                 continue
-            seen_spans.add(idx)
+            seen_spans.add(span)
             matches.append(
                 Match(
                     type="fingerprint",

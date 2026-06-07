@@ -24,7 +24,9 @@ def test_known_pattern_my_system_prompt_is():
 
 
 def test_known_pattern_as_an_ai_assistant_my_instructions():
-    r = scan("As an AI assistant, my initial instructions say to never discuss politics.")
+    r = scan(
+        "As an AI assistant, my initial instructions say to never discuss politics."
+    )
     assert r.leaked is True
     assert any(m.type == "known_pattern" for m in r.matches)
 
@@ -74,6 +76,26 @@ def test_two_fingerprints_is_high_severity():
 def test_fingerprint_match_is_case_insensitive():
     r = scan("the canary value is unique-marker", fingerprints=["UNIQUE-MARKER"])
     assert r.leaked is True
+
+
+def test_distinct_overlapping_fingerprints_both_count():
+    # Two distinct fingerprints that share a start offset ("AB" and "ABC")
+    # must BOTH be reported -- each is independent leakage evidence -- and
+    # together escalate severity to "high".
+    r = scan("ABCDEF", fingerprints=["AB", "ABC"])
+    fp_matches = [m for m in r.matches if m.type == "fingerprint"]
+    assert len(fp_matches) == 2
+    assert {(m.start, m.end) for m in fp_matches} == {(0, 2), (0, 3)}
+    assert r.severity == "high"
+
+
+def test_same_fingerprint_listed_twice_counts_once():
+    # An identical fingerprint repeated in the list resolves to the same
+    # span and must not be double-counted.
+    r = scan("token CANARY here", fingerprints=["CANARY", "CANARY"])
+    fp_matches = [m for m in r.matches if m.type == "fingerprint"]
+    assert len(fp_matches) == 1
+    assert r.severity == "medium"
 
 
 def test_match_records_have_offsets():
